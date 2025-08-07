@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Cube Academy - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            /* Apple-inspired Design System */
+            --primary-blue: #007AFF;
+            --primary-blue-dark: #0056CC;
+            --primary-blue-light: #4DA6FF;
+            --accent-purple: #AF52DE;
+            --accent-purple-dark: #8E44AD;
+            
+            --background-primary: #F2F2F7;
+            --background-secondary: #FFFFFF;
+            --background-tertiary: #F9F9FB;
+            
+            --text-primary: #1D1D1F;
+            --text-secondary: #86868B;
+            --text-tertiary: #C7C7CC;
+            
+            --border-light: #E5E5EA;
+            --border-medium: #D1D1D6;
+            
+            --success: #30D158;
+            --warning: #FF9F0A;
+            --error: #FF3B30;
+            
+            --shadow-small: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 4px 10px rgba(0, 0, 0, 0.08); /* Adjusted for softer look */
+            --shadow-large: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --shadow-glow: 0 8px 32px rgba(0, 122, 255, 0.4); /* Increased opacity for better glow */
+            
+            --radius-small: 8px;
+            --radius-medium: 12px;
+            --radius-large: 16px;
+            --radius-xl: 20px;
+            
+            --gradient-primary: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+            --gradient-secondary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gradient-background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Utilities */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .scale-in {
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-large);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Login Screen */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--background-secondary);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-large);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-large);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .login-logo i {
+            font-size: 36px;
+            color: white;
+        }
+
+        .login-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            font-size: 16px;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            min-height: 100vh;
+            padding-top: 80px; /* Space for fixed header */
+            margin-left: 220px; /* Space for fixed sidebar */
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Vertical sidebar styles */
+        .sidebar {
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            width: 220px;
+            background: var(--background-secondary);
+            box-shadow: var(--shadow-medium);
+            display: flex;
+            flex-direction: column;
+            z-index: 1001;
+            transition: width 0.3s ease;
+        }
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 24px 16px 12px 16px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+        .sidebar-logo i {
+            font-size: 24px; /* Slightly larger icon */
+        }
+        .sidebar-menu {
+            flex: 1;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-item {
+            padding: 16px 24px;
+            font-size: 16px;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s, color 0.2s;
+            border-radius: var(--radius-medium); /* Add border-radius for items */
+            margin: 0 8px 4px; /* Add margin for spacing */
+        }
+        .sidebar-item.active {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-glow);
+            font-weight: 600; /* Make active item text bolder */
+        }
+        .sidebar-item:hover:not(.active) {
+            background: var(--background-tertiary);
+            color: var(--primary-blue); /* Hover color for non-active items */
+        }
+        .sidebar-item i {
+            font-size: 18px;
+        }
+
+        /* Responsive sidebar */
+        @media (max-width: 900px) {
+            .sidebar { width: 64px; }
+            .sidebar-logo span { display: none; }
+            .sidebar-logo { justify-content: center; padding: 24px 0 12px 0; }
+            .sidebar-item { justify-content: center; padding: 16px 0; margin: 0 8px 4px; }
+            .sidebar-item span { display: none; }
+            .dashboard { margin-left: 64px; }
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 220px; /* Adjusted for sidebar width */
+            right: 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-light);
+            z-index: 1000;
+            height: 80px;
+            transition: left 0.3s ease; /* Transition for responsive sidebar */
+        }
+        @media (max-width: 900px) {
+            .header { left: 64px; } /* Adjusted for collapsed sidebar */
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%;
+            padding: 0 24px;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-medium);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-logo i {
+            color: white;
+            font-size: 20px;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-badge {
+            background: var(--background-tertiary);
+            padding: 8px 16px;
+            border-radius: var(--radius-medium);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--background-secondary);
+            border-radius: var(--radius-large);
+            padding: 24px;
+            box-shadow: var(--shadow-medium);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card.primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .stat-card.secondary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .stat-card.success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .stat-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-info h3 {
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        .stat-info p {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            opacity: 0.6;
+        }
+
+        /* Last Registration IDs */
+        .last-reg-section {
+            background: var(--background-secondary);
+            border-radius: var(--radius-large);
+            box-shadow: var(--shadow-medium);
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .reg-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .reg-item {
+            background: var(--background-tertiary);
+            border-radius: var(--radius-medium);
+            padding: 16px;
+            border: 1px solid var(--border-light);
+        }
+
+        .reg-batch {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--primary-blue);
+            margin-bottom: 4px;
+        }
+
+        .reg-id {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Tabs (now handled by sidebar, but content styles remain) */
+        .tabs {
+            background: var(--background-secondary);
+            border-radius: var(--radius-large);
+            box-shadow: var(--shadow-medium);
+            overflow: hidden;
+        }
+
+        /* Removed .tab-list and .tab-button styles as they are replaced by sidebar */
+
+        .tab-content {
+            display: none;
+            padding: 32px;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-medium);
+            font-size: 16px;
+            background: var(--background-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius-medium);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 122, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--background-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-medium);
+        }
+
+        .btn-secondary:hover {
+            background: var(--background-secondary);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e60000;
+            transform: translateY(-1px);
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--background-secondary);
+            border-radius: var(--radius-large);
+            box-shadow: var(--shadow-medium);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Tables */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .table th {
+            background: var(--background-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .table tbody tr:hover {
+            background: var(--background-tertiary);
+        }
+
+        /* Loading */
+        .loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .loading::after {
+            content: '';
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-light);
+            border-top: 2px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: var(--background-secondary);
+            border-radius: var(--radius-medium);
+            box-shadow: var(--shadow-large);
+            padding: 16px 20px;
+            max-width: 400px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .toast.success {
+            border-left-color: var(--success);
+        }
+
+        .toast.error {
+            border-left-color: var(--error);
+        }
+
+        .toast.info {
+            border-left-color: var(--primary-blue);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Search Results */
+        .search-result {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: var(--radius-large);
+            padding: 24px;
+            margin-top: 20px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+            margin-bottom: 20px; /* Added margin */
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-medium);
+            padding: 12px;
+        }
+
+        .result-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .result-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Management Section */
+        .management-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+        }
+
+        .add-form {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .item-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--background-tertiary);
+            border-radius: var(--radius-medium);
+            margin-bottom: 8px;
+        }
+
+        .item-name {
+            font-weight: 500;
+        }
+
+        /* Report Cards */
+        .report-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: end;
+            margin-bottom: 24px;
+        }
+
+        .report-summary {
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: var(--radius-large);
+            padding: 24px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .report-section {
+            background: var(--background-tertiary);
+            border-radius: var(--radius-medium);
+            padding: 20px;
+        }
+
+        .report-section h4 {
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .report-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--background-secondary);
+            border-radius: var(--radius-small);
+            margin-bottom: 8px;
+        }
+
+        .report-badge {
+            background: var(--primary-blue);
+            color: white;
+            padding: 4px 8px;
+            border-radius: var(--radius-small);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Custom Modal for Confirmations */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-card {
+            background: var(--background-secondary);
+            border-radius: var(--radius-large);
+            box-shadow: var(--shadow-large);
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        .modal-message {
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            .header-content {
+                padding: 0 16px;
+            }
+
+            /* Removed tab-list flex-direction as sidebar handles navigation */
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .management-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .report-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-card scale-in">
+            <div class="login-logo">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h1 class="login-title">Physics Cube Academy</h1>
+            <p class="login-subtitle">Admin Dashboard Login</p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <input type="text" id="username" name="username" class="form-input" placeholder="Enter username" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <span id="loginText">Sign In</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard hidden">
+        <!-- Sidebar navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Physics Cube Academy</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li data-tab="register" class="sidebar-item active"><i class="fas fa-user-plus"></i> <span>Register</span></li>
+                <li data-tab="manage" class="sidebar-item"><i class="fas fa-cog"></i> <span>Manage Data</span></li>
+                <li data-tab="lookup" class="sidebar-item"><i class="fas fa-search"></i> <span>Lookup</span></li>
+                <li data-tab="reports" class="sidebar-item"><i class="fas fa-chart-bar"></i> <span>Reports</span></li>
+                <li data-tab="analytics" class="sidebar-item"><i class="fas fa-chart-line"></i> <span>Analytics</span></li>
+            </ul>
+            <!-- User and Logout at the bottom of the sidebar -->
+            <div style="padding: 16px; border-top: 1px solid var(--border-light); text-align: center;">
+                <div class="user-badge" style="margin-bottom: 12px;">
+                    Welcome, <span id="currentUser"></span>
+                </div>
+                <button class="btn btn-secondary btn-full" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </nav>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-brand">
+                    <!-- Logo and title moved to sidebar -->
+                    <div>
+                        <div class="header-title">Admin Dashboard</div>
+                        <div class="header-subtitle">Manage student registrations and data</div>
+                    </div>
+                </div>
+                <!-- User and Logout moved to sidebar -->
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Stats Cards -->
+            <div class="stats-grid fade-in">
+                <div class="stat-card primary hover-lift">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h3>Total Districts</h3>
+                            <p id="totalDistricts">0</p>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card secondary hover-lift">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h3>Active Batches</h3>
+                            <p id="totalBatches">0</p>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card success hover-lift">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h3>Registered Students</h3>
+                            <p id="totalStudents">0</p>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Last Registration IDs -->
+            <div id="lastRegSection" class="last-reg-section fade-in hidden">
+                <h2 class="section-title">
+                    <i class="fas fa-id-card" style="color: var(--primary-blue);"></i>
+                    Last Registration IDs by Batch
+                </h2>
+                <div id="regGrid" class="reg-grid"></div>
+            </div>
+
+            <!-- Main Tabs (content sections, navigation handled by sidebar) -->
+            <div class="tabs fade-in">
+                <!-- Removed .tab-list as navigation is now sidebar -->
+
+                <!-- Register Student Tab -->
+                <div id="register" class="tab-content active">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-user-plus" style="color: var(--primary-blue);"></i>
+                            Register New Student
+                        </h2>
+                        <p class="card-subtitle">Fill in the student details to register a new student</p>
+                    </div>
+
+                    <form id="studentForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="registrationId">Registration ID *</label>
+                                <input type="text" id="registrationId" name="registrationId" class="form-input" placeholder="Enter registration ID" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="studentName">Student Name *</label>
+                                <input type="text" id="studentName" name="name" class="form-input" placeholder="Enter student name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="studentDistrict">District *</label>
+                                <select id="studentDistrict" name="district" class="form-select" required>
+                                    <option value="">Select district</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="studentBatch">Batch *</label>
+                                <select id="studentBatch" name="batch" class="form-select" required>
+                                    <option value="">Select batch</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="joinDate">Join Date *</label>
+                                <input type="date" id="joinDate" name="joinDate" class="form-input" required>
+                            </div>
+                            <!-- REMOVED Join Year group -->
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="fas fa-plus"></i>
+                            <span id="registerText">Register Student</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Manage Data Tab -->
+                <div id="manage" class="tab-content">
+                    <div class="management-grid">
+                        <!-- Districts Management -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-map-marker-alt" style="color: var(--primary-blue);"></i>
+                                    Manage Districts
+                                </h3>
+                            </div>
+                            <div class="add-form">
+                                <input type="text" id="newDistrict" class="form-input" placeholder="Add new district" style="flex: 1;">
+                                <button class="btn btn-primary" onclick="addDistrict()">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </div>
+                            <div id="districtsList" class="item-list"></div>
+                        </div>
+
+                        <!-- Batches Management -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-users" style="color: var(--accent-purple);"></i>
+                                    Manage Batches
+                                </h3>
+                            </div>
+                            <div class="add-form">
+                                <input type="text" id="newBatch" class="form-input" placeholder="Add new batch" style="flex: 1;">
+                                <button class="btn btn-primary" onclick="addBatch()">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </div>
+                            <div id="batchesList" class="item-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Student Lookup Tab -->
+                <div id="lookup" class="tab-content">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-search" style="color: var(--success);"></i>
+                            Student Lookup
+                        </h2>
+                        <p class="card-subtitle">Search for a student by their registration ID</p>
+                    </div>
+                    <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                        <input type="text" id="searchId" class="form-input" placeholder="Enter registration ID" style="flex: 1;">
+                        <button class="btn btn-primary" onclick="searchStudent()">
+                            <i class="fas fa-search"></i>
+                            <span id="searchText">Search</span>
+                        </button>
+                    </div>
+                    <div id="searchResult"></div>
+                </div>
+
+                <!-- Reports Tab -->
+                <div id="reports" class="tab-content">
+                    <!-- Date Report -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-calendar-alt" style="color: var(--primary-blue);"></i>
+                                Date-wise Report
+                            </h3>
+                        </div>
+                        <div class="report-controls">
+                            <div class="form-group">
+                                <label class="form-label" for="reportDate">Select Date</label>
+                                <input type="date" id="reportDate" class="form-input">
+                            </div>
+                            <button class="btn btn-primary" onclick="generateDateReport()">
+                                <i class="fas fa-chart-line"></i>
+                                <span id="dateReportText">Generate Report</span>
+                            </button>
+                        </div>
+                        <div id="dateReportResult"></div>
+                    </div>
+
+                    <!-- Count Report -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-file-alt" style="color: var(--primary-blue);"></i>
+                                Count Report
+                            </h3>
+                        </div>
+                        <div class="report-controls">
+                            <div class="form-group">
+                                <label class="form-label" for="countStartDate">Start Date</label>
+                                <input type="date" id="countStartDate" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="countEndDate">End Date</label>
+                                <input type="date" id="countEndDate" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="countBatch">Batch (Optional)</label>
+                                <select id="countBatch" class="form-select">
+                                    <option value="">All batches</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" onclick="generateCountReport()">
+                                <i class="fas fa-file-alt"></i>
+                                <span id="countReportText">Generate Count Report</span>
+                            </button>
+                        </div>
+                        <div id="countReportResult"></div>
+                    </div>
+                </div>
+
+                <!-- Analytics Tab -->
+                <div id="analytics" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-chart-line" style="color: var(--success);"></i>
+                                Daily Registration Analytics
+                            </h2>
+                            <p class="card-subtitle">Interactive charts showing daily registration trends</p>
+                        </div>
+                        <div class="report-controls" style="align-items: center;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" for="analyticsStartDate">Start Date</label>
+                                <input type="date" id="analyticsStartDate" class="form-input">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" for="analyticsEndDate">End Date</label>
+                                <input type="date" id="analyticsEndDate" class="form-input">
+                            </div>
+                            <button class="btn btn-primary" onclick="generateDailyAnalytics()">
+                                <i class="fas fa-chart-area"></i>
+                                <span id="analyticsText">Generate Chart</span>
+                            </button>
+                        </div>
+                        <div style="height: 400px; margin-top: 20px;">
+                            <canvas id="dailyAnalyticsChart"></canvas>
+                        </div>
+                        <div id="analyticsPlaceholder" style="text-align: center; padding: 40px; color: var(--text-secondary); display: none;">
+                            <i class="fas fa-chart-bar" style="font-size: 48px; color: var(--text-tertiary); margin-bottom: 16px;"></i>
+                            <p>Analytics charts will be displayed here</p>
+                            <p style="color: var(--text-tertiary); font-size: 14px;">Select dates and click "Generate Chart"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmationModal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 class="modal-title" id="modalTitle">Confirm Action</h3>
+            <p class="modal-message" id="modalMessage">Are you sure you want to proceed?</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="modalCancel">Cancel</button>
+                <button class="btn btn-danger" id="modalConfirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // REPLACE WITH YOUR ACTUAL GOOGLE APPS SCRIPT WEB APP URL
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxHdQ7mQ9fbWoiTv1SqEhn0aQH_inSeMzOuCX8WqfWRVtqGtR2na9z_88yMbm4A0obH5A/exec';
+        
+        // Global variables
+        let currentUser = '';
+        let isLoading = false;
+        let districts = [];
+        let batches = [];
+        let lastRegIds = {};
+        let allStudents = []; // Store all students for total count
+        let dailyAnalyticsChart; // To hold the Chart.js instance
+        let currentStudent = null; // Store the student object for update/delete
+
+        // Utility Functions
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function setLoading(elementId, loadingState, originalText = '') {
+            const element = document.getElementById(elementId);
+            if (loadingState) {
+                element.innerHTML = '<span class="loading">Loading...</span>';
+                element.disabled = true; // Disable button while loading
+            } else {
+                element.textContent = originalText;
+                element.disabled = false; // Re-enable button
+            }
+        }
+
+        async function callAPI(functionName, parameters = {}) {
+            try {
+                const formData = new FormData();
+                formData.append('function', functionName);
+                formData.append('parameters', JSON.stringify(parameters));
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    // Attempt to read error message from response body if available
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! Status: ${response.status}. Response: ${errorText}`);
+                }
+
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('API call failed:', error);
+                showToast(`API Connection Error: ${error.message}`, 'error');
+                return { success: false, message: error.message };
+            }
+        }
+
+        /**
+         * Shows a custom confirmation modal.
+         * @param {string} title The title of the modal.
+         * @param {string} message The confirmation message.
+         * @returns {Promise<boolean>} Resolves to true if confirmed, false if cancelled.
+         */
+        function showConfirmationModal(title, message) {
+            return new Promise(resolve => {
+                const modalOverlay = document.getElementById('confirmationModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalMessage = document.getElementById('modalMessage');
+                const modalConfirm = document.getElementById('modalConfirm');
+                const modalCancel = document.getElementById('modalCancel');
+
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                modalOverlay.classList.add('active');
+
+                const handleConfirm = () => {
+                    modalOverlay.classList.remove('active');
+                    modalConfirm.removeEventListener('click', handleConfirm);
+                    modalCancel.removeEventListener('click', handleCancel);
+                    resolve(true);
+                };
+
+                const handleCancel = () => {
+                    modalOverlay.classList.remove('active');
+                    modalConfirm.removeEventListener('click', handleConfirm);
+                    modalCancel.removeEventListener('click', handleCancel);
+                    resolve(false);
+                };
+
+                modalConfirm.addEventListener('click', handleConfirm);
+                modalCancel.addEventListener('click', handleCancel);
+            });
+        }
+
+        // Authentication
+        async function login(username, password) {
+            setLoading('loginText', true, 'Sign In');
+            
+            const result = await callAPI('authenticate', { username, password });
+            
+            if (result.success) {
+                currentUser = username;
+                document.getElementById('currentUser').textContent = username;
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                
+                // Store auth for 24 hours
+                localStorage.setItem('pca_auth', JSON.stringify({
+                    username: username,
+                    timestamp: Date.now()
+                }));
+                
+                showToast(`Welcome ${username}!`, 'success');
+                await loadInitialData();
+            } else {
+                showToast(result.message, 'error');
+            }
+            
+            setLoading('loginText', false, 'Sign In');
+        }
+
+        function logout() {
+            currentUser = '';
+            localStorage.removeItem('pca_auth');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('loginForm').reset();
+            showToast('You have been logged out successfully.', 'info');
+        }
+
+        // Data Loading
+        async function loadInitialData() {
+            const [districtsRes, batchesRes, lastIdsRes, studentsRes] = await Promise.all([
+                callAPI('getDistricts'),
+                callAPI('getBatches'),
+                callAPI('getLastRegistrationIds'),
+                callAPI('getStudents') // Fetch all students for total count
+            ]);
+
+            if (districtsRes.success) {
+                districts = districtsRes.data;
+                updateDistrictsUI();
+            } else {
+                showToast(`Error loading districts: ${districtsRes.message}`, 'error');
+            }
+
+            if (batchesRes.success) {
+                batches = batchesRes.data;
+                updateBatchesUI();
+            } else {
+                showToast(`Error loading batches: ${batchesRes.message}`, 'error');
+            }
+
+            if (lastIdsRes.success) {
+                lastRegIds = lastIdsRes.data;
+                updateLastRegIds();
+            } else {
+                showToast(`Error loading last registration IDs: ${lastIdsRes.message}`, 'error');
+            }
+
+            if (studentsRes.success) {
+                allStudents = studentsRes.data; // Store all students
+            } else {
+                showToast(`Error loading all students: ${studentsRes.message}`, 'error');
+            }
+
+            updateStats(); // Update stats after all data is loaded
+        }
+
+        function updateStats() {
+            document.getElementById('totalDistricts').textContent = districts.length;
+            document.getElementById('totalBatches').textContent = batches.length;
+            document.getElementById('totalStudents').textContent = allStudents.length; // Use total students count
+        }
+
+        function updateDistrictsUI() {
+            const select = document.getElementById('studentDistrict');
+            const list = document.getElementById('districtsList');
+            
+            // Update select dropdown
+            select.innerHTML = '<option value="">Select district</option>';
+            districts.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = district;
+                select.appendChild(option);
+            });
+            
+            // Update management list
+            list.innerHTML = '';
+            if (districts.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">No districts added yet.</p>';
+            } else {
+                districts.forEach(district => {
+                    const item = document.createElement('div');
+                    item.className = 'item';
+                    item.innerHTML = `
+                        <span class="item-name">${district}</span>
+                        <button class="btn btn-danger" onclick="deleteDistrict('${district}')" style="padding: 6px 12px; font-size: 14px;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+        }
+
+        function updateBatchesUI() {
+            const select = document.getElementById('studentBatch');
+            const reportSelect = document.getElementById('countBatch'); /* Changed ID here */
+            const list = document.getElementById('batchesList');
+            
+            // Update select dropdowns
+            select.innerHTML = '<option value="">Select batch</option>';
+            reportSelect.innerHTML = '<option value="">All batches</option>';
+            
+            batches.forEach(batch => {
+                const option1 = document.createElement('option');
+                option1.value = batch;
+                option1.textContent = batch;
+                select.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.value = batch;
+                option2.textContent = batch;
+                reportSelect.appendChild(option2);
+            });
+            
+            // Update management list
+            list.innerHTML = '';
+            if (batches.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">No batches added yet.</p>';
+            } else {
+                batches.forEach(batch => {
+                    const item = document.createElement('div');
+                    item.className = 'item';
+                    item.innerHTML = `
+                        <span class="item-name">${batch}</span>
+                        <button class="btn btn-danger" onclick="deleteBatch('${batch}')" style="padding: 6px 12px; font-size: 14px;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+        }
+
+        function updateLastRegIds() {
+            const section = document.getElementById('lastRegSection');
+            const grid = document.getElementById('regGrid');
+            
+            if (Object.keys(lastRegIds).length > 0) {
+                section.classList.remove('hidden');
+                grid.innerHTML = '';
+                
+                Object.entries(lastRegIds).forEach(([batch, regId]) => {
+                    const item = document.createElement('div');
+                    item.className = 'reg-item hover-lift';
+                    item.innerHTML = `
+                        <div class="reg-batch">${batch}</div>
+                        <div class="reg-id">${regId}</div>
+                    `;
+                    grid.appendChild(item);
+                });
+            } else {
+                section.classList.add('hidden');
+            }
+        }
+
+        // Student Registration
+        async function registerStudent(formData) {
+            setLoading('registerText', true, 'Register Student');
+            
+            const result = await callAPI('addStudent', {
+                registrationId: formData.get('registrationId'),
+                name: formData.get('name'),
+                district: formData.get('district'),
+                batch: formData.get('batch'),
+                joinDate: formData.get('joinDate'),
+                // Removed joinYear as it's no longer needed
+                addedBy: currentUser
+            });
+            
+            if (result.success) {
+                showToast(`Student registered successfully! Registration ID: ${result.registrationId}`, 'success');
+                document.getElementById('studentForm').reset();
+                // Re-set default date after reset
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('joinDate').value = today;
+                await loadInitialData(); // Reload all data to update stats and reg IDs
+            } else {
+                showToast(result.message, 'error');
+            }
+            
+            setLoading('registerText', false, 'Register Student');
+        }
+
+        // District Management
+        async function addDistrict() {
+            const input = document.getElementById('newDistrict');
+            const district = input.value.trim();
+            
+            if (!district) {
+                showToast('Please enter a district name', 'error');
+                return;
+            }
+            
+            const result = await callAPI('addDistrict', { district });
+            
+            if (result.success) {
+                showToast(`${district} added successfully!`, 'success');
+                input.value = '';
+                await loadInitialData(); // Reload all data
+            } else {
+                showToast(result.message, 'error');
+            }
+        }
+
+        async function deleteDistrict(district) {
+            const confirmed = await showConfirmationModal(
+                'Confirm Deletion',
+                `Are you sure you want to delete the district "${district}"? This action cannot be undone.`
+            );
+            
+            if (!confirmed) {
+                return;
+            }
+            
+            const result = await callAPI('deleteDistrict', { district });
+            
+            if (result.success) {
+                showToast(`${district} deleted successfully!`, 'success');
+                await loadInitialData(); // Reload all data
+            } else {
+                showToast(result.message, 'error');
+            }
+        }
+
+        // Batch Management
+        async function addBatch() {
+            const input = document.getElementById('newBatch');
+            const batch = input.value.trim();
+            
+            if (!batch) {
+                showToast('Please enter a batch name', 'error');
+                return;
+            }
+            
+            const result = await callAPI('addBatch', { batch });
+            
+            if (result.success) {
+                showToast(`${batch} added successfully!`, 'success');
+                input.value = '';
+                await loadInitialData(); // Reload all data
+            } else {
+                showToast(result.message, 'error');
+            }
+        }
+
+        async function deleteBatch(batch) {
+            const confirmed = await showConfirmationModal(
+                'Confirm Deletion',
+                `Are you sure you want to delete the batch "${batch}"? This action cannot be undone.`
+            );
+            
+            if (!confirmed) {
+                return;
+            }
+            
+            const result = await callAPI('deleteBatch', { batch });
+            
+            if (result.success) {
+                showToast(`${batch} deleted successfully!`, 'success');
+                await loadInitialData(); // Reload all data
+            } else {
+                showToast(result.message, 'error');
+            }
+        }
+
+        // Student Search, Update, Delete
+        async function searchStudent() {
+            const input = document.getElementById('searchId');
+            const registrationId = input.value.trim();
+            
+            if (!registrationId) {
+                showToast('Please enter a registration ID', 'error');
+                document.getElementById('searchResult').innerHTML = ''; // Clear previous results
+                return;
+            }
+            
+            setLoading('searchText', true, 'Search');
+            
+            const result = await callAPI('searchStudent', { registrationId });
+            const searchResultDiv = document.getElementById('searchResult');
+
+            if (result.success) {
+                currentStudent = result.data; // Store the found student
+                searchResultDiv.innerHTML = `
+                    <div class="search-result">
+                        <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                            <i class="fas fa-user-check"></i>
+                            Student Found
+                        </h3>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">Registration ID</div>
+                                <div class="result-value" id="editRegId">${currentStudent.registrationId || 'N/A'}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Name</div>
+                                <input type="text" id="editName" class="form-input" value="${currentStudent.name || ''}">
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">District</div>
+                                <select id="editDistrict" class="form-select"></select>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Batch</div>
+                                <select id="editBatch" class="form-select"></select>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Join Date</div>
+                                <input type="date" id="editJoinDate" class="form-input" value="${currentStudent.joinDate || ''}">
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Added By</div>
+                                <div class="result-value">${currentStudent.addedBy || 'N/A'}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Added At</div>
+                                <div class="result-value">${currentStudent.addedAt ? new Date(currentStudent.addedAt).toLocaleString() : 'N/A'}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Updated At</div>
+                                <div class="result-value">${currentStudent.updatedAt ? new Date(currentStudent.updatedAt).toLocaleString() : 'N/A'}</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                            <button class="btn btn-primary" onclick="updateStudent()">
+                                <i class="fas fa-save"></i>
+                                <span id="updateStudentText">Update Student</span>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteStudent()">
+                                <i class="fas fa-trash"></i>
+                                <span id="deleteStudentText">Delete Student</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                populateEditDropdowns(); // Populate dropdowns for editing
+            } else {
+                showToast(result.message, 'error');
+                searchResultDiv.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <i class="fas fa-user-times" style="font-size: 48px; margin-bottom: 16px;"></i>
+                        <p>${result.message}</p>
+                    </div>
+                `;
+                currentStudent = null; // Clear current student
+            }
+            
+            setLoading('searchText', false, 'Search');
+        }
+
+        function populateEditDropdowns() {
+            const editDistrictSelect = document.getElementById('editDistrict');
+            const editBatchSelect = document.getElementById('editBatch');
+
+            editDistrictSelect.innerHTML = '';
+            districts.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = district;
+                editDistrictSelect.appendChild(option);
+            });
+            if (currentStudent && currentStudent.district) {
+                editDistrictSelect.value = currentStudent.district;
+            }
+
+            editBatchSelect.innerHTML = '';
+            batches.forEach(batch => {
+                const option = document.createElement('option');
+                option.value = batch;
+                option.textContent = batch;
+                editBatchSelect.appendChild(option);
+            });
+            if (currentStudent && currentStudent.batch) {
+                editBatchSelect.value = currentStudent.batch;
+            }
+        }
+
+        async function updateStudent() {
+            if (!currentStudent) {
+                showToast('No student selected for update.', 'error');
+                return;
+            }
+
+            setLoading('updateStudentText', true, 'Update Student');
+
+            const updatedData = {
+                registrationId: currentStudent.registrationId,
+                name: document.getElementById('editName').value.trim(),
+                district: document.getElementById('editDistrict').value,
+                batch: document.getElementById('editBatch').value,
+                joinDate: document.getElementById('editJoinDate').value,
+                updatedBy: currentUser // The admin currently logged in
+            };
+
+            const result = await callAPI('updateStudent', updatedData);
+
+            if (result.success) {
+                showToast(result.message, 'success');
+                // Re-search to refresh the displayed data
+                await searchStudent(); 
+                await loadInitialData(); // Reload all data to update stats
+            } else {
+                showToast(result.message, 'error');
+            }
+
+            setLoading('updateStudentText', false, 'Update Student');
+        }
+
+        async function deleteStudent() {
+            if (!currentStudent) {
+                showToast('No student selected for deletion.', 'error');
+                return;
+            }
+
+            const confirmed = await showConfirmationModal(
+                'Confirm Deletion',
+                `Are you sure you want to delete student with Registration ID: "${currentStudent.registrationId}"? This action cannot be undone.`
+            );
+            
+            if (!confirmed) {
+                return;
+            }
+
+            setLoading('deleteStudentText', true, 'Delete Student');
+
+            const result = await callAPI('deleteStudent', { registrationId: currentStudent.registrationId });
+
+            if (result.success) {
+                showToast(result.message, 'success');
+                document.getElementById('searchResult').innerHTML = ''; // Clear search result
+                currentStudent = null; // Clear current student
+                await loadInitialData(); // Reload all data to update stats
+            } else {
+                showToast(result.message, 'error');
+            }
+
+            setLoading('deleteStudentText', false, 'Delete Student');
+        }
+
+
+        // Date Report
+        async function generateDateReport() {
+            const dateInput = document.getElementById('reportDate');
+            const date = dateInput.value;
+            
+            if (!date) {
+                showToast('Please select a date', 'error');
+                return;
+            }
+            
+            setLoading('dateReportText', true, 'Generate Report');
+            
+            const result = await callAPI('getDateReport', { date });
+            const reportDiv = document.getElementById('dateReportResult');
+
+            if (result.success) {
+                const students = result.data;
+                
+                if (students.length > 0) {
+                    let tableHTML = `
+                        <h4 style="margin-top: 24px; margin-bottom: 16px;">
+                            Students registered on ${new Date(date + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            (${students.length} students)
+                        </h4>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Registration ID</th>
+                                    <th>Name</th>
+                                    <th>District</th>
+                                    <th>Batch</th>
+                                    <th>Added By</th>
+                                    <th>Update</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    students.forEach(student => {
+                        tableHTML += `
+                            <tr>
+                                <td>${student.registrationId || 'N/A'}</td>
+                                <td>${student.name || 'N/A'}</td>
+                                <td>${student.district || 'N/A'}</td>
+                                <td>${student.batch || 'N/A'}</td>
+                                <td>${student.addedBy || 'N/A'}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" onclick="editStudentFromDateReport('${student.registrationId}')">Update</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    tableHTML += '</tbody></table>';
+                    reportDiv.innerHTML = tableHTML;
+                    
+                    showToast(`Found ${students.length} students for ${new Date(date + 'T00:00:00').toLocaleDateString()}`, 'success');
+                } else {
+                    reportDiv.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                            <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: 16px;"></i>
+                            <p>No students found for ${new Date(date + 'T00:00:00').toLocaleDateString()}</p>
+                        </div>
+                    `;
+                    showToast('No students found for the selected date', 'info');
+                }
+            } else {
+                showToast(result.message, 'error');
+                reportDiv.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 16px; color: var(--error);"></i>
+                        <p>Error generating date report: ${result.message}</p>
+                    </div>
+                `;
+            }
+            
+            setLoading('dateReportText', false, 'Generate Report');
+        }
+
+        // Edit student from datewise report
+        window.editStudentFromDateReport = async function(registrationId) {
+            document.getElementById('searchId').value = registrationId;
+            switchTab('lookup');
+            await searchStudent();
+        };
+
+        // Count Report
+        async function generateCountReport() {
+            setLoading('countReportText', true, 'Generate Count Report');
+            const startDate = document.getElementById('countStartDate').value; /* Changed ID here */
+            const endDate = document.getElementById('countEndDate').value; /* Changed ID here */
+            const batch = document.getElementById('countBatch').value || undefined;
+            
+            const result = await callAPI('getCountReport', { startDate, endDate, batch });
+            const reportDiv = document.getElementById('countReportResult');
+
+            if (result.success) {
+                const { registrationsByAdmin, registrationsByBatch, totalRegistrations } = result.data;
+                
+                let html = `
+                    <div class="report-grid">
+                        <div class="report-section">
+                            <h4>Registrations by Admin</h4>
+                            ${Object.keys(registrationsByAdmin).length > 0 ? 
+                                Object.entries(registrationsByAdmin).map(([admin, count]) => `
+                                    <div class="report-item">
+                                        <span>${admin}</span>
+                                        <span class="report-badge">${count}</span>
+                                    </div>
+                                `).join('') : '<p style="color: var(--text-secondary); text-align: center;">No data for admins.</p>'}
+                        </div>
+                        <div class="report-section">
+                            <h4>Registrations by Batch</h4>
+                            ${Object.keys(registrationsByBatch).length > 0 ?
+                                Object.entries(registrationsByBatch).map(([batchName, count]) => `
+                                    <div class="report-item">
+                                        <span>${batchName}</span>
+                                        <span class="report-badge">${count}</span>
+                                    </div>
+                                `).join('') : '<p style="color: var(--text-secondary); text-align: center;">No data for batches.</p>'}
+                        </div>
+                    </div>
+                    <div class="report-summary">
+                        <h3 style="margin-bottom: 8px;">Total Registrations</h3>
+                        <p style="font-size: 32px; font-weight: 700;">${totalRegistrations}</p>
+                    </div>
+                `;
+                reportDiv.innerHTML = html;
+                showToast(`Count report generated: ${totalRegistrations} total registrations`, 'success');
+            } else {
+                showToast(result.message, 'error');
+                reportDiv.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 16px; color: var(--error);"></i>
+                        <p>Error generating count report: ${result.message}</p>
+                    </div>
+                `;
+            }
+            
+            setLoading('countReportText', false, 'Generate Count Report');
+        }
+
+        // Daily Analytics (Chart.js)
+        async function generateDailyAnalytics() {
+            const startDate = document.getElementById('analyticsStartDate').value;
+            const endDate = document.getElementById('analyticsEndDate').value;
+
+            if (!startDate || !endDate) {
+                showToast('Please select both start and end dates for analytics', 'error');
+                return;
+            }
+
+            setLoading('analyticsText', true, 'Generate Chart');
+            document.getElementById('analyticsPlaceholder').style.display = 'none'; // Hide placeholder
+
+            const result = await callAPI('getDailyAnalytics', { startDate, endDate });
+            const chartCanvas = document.getElementById('dailyAnalyticsChart');
+
+            if (result.success) {
+                const data = result.data;
+                const labels = data.map(item => item.date);
+                const counts = data.map(item => item.registrations);
+
+                if (dailyAnalyticsChart) {
+                    dailyAnalyticsChart.destroy(); // Destroy existing chart instance
+                }
+
+                dailyAnalyticsChart = new Chart(chartCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Daily Registrations',
+                            data: counts,
+                            backgroundColor: 'rgba(0, 122, 255, 0.2)',
+                            borderColor: 'var(--primary-blue)',
+                            borderWidth: 2,
+                            tension: 0.4, // Smooth line
+                            fill: true,
+                            pointBackgroundColor: 'var(--primary-blue)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'var(--primary-blue)',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Daily Student Registrations',
+                                font: {
+                                    size: 18,
+                                    weight: 'bold'
+                                },
+                                color: 'var(--text-primary)'
+                            },
+                            tooltip: {
+                                enabled: true, // Ensure tooltip is enabled
+                                backgroundColor: 'rgba(255,255,255,0.94)', // Light background for tooltip
+                                titleColor: 'var(--primary-blue)', // Title color from CSS variable
+                                bodyColor: 'var(--text-primary)', // Body color from CSS variable
+                                borderColor: 'var(--primary-blue)', // Border color from CSS variable
+                                borderWidth: 2,
+                                borderRadius: 10,
+                                displayColors: false,
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        return 'Date: ' + tooltipItems[0].label;
+                                    },
+                                    label: function(tooltipItem) {
+                                        return 'Registrations: ' + tooltipItem.formattedValue;
+                                    }
+                                }
+                            },
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: 'var(--text-secondary)'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: 'var(--text-secondary)',
+                                    precision: 0 // Ensure integer ticks for counts
+                                },
+                                grid: {
+                                    color: 'var(--border-light)'
+                                }
+                            }
+                        }
+                    }
+                });
+                showToast('Daily analytics chart generated!', 'success');
+            } else {
+                showToast(result.message, 'error');
+                if (dailyAnalyticsChart) {
+                    dailyAnalyticsChart.destroy(); // Destroy chart on error
+                }
+                document.getElementById('analyticsPlaceholder').style.display = 'block'; // Show placeholder
+            }
+
+            setLoading('analyticsText', false, 'Generate Chart');
+        }
+
+        // Helper Functions
+        // Removed updateJoinYear() function completely as it's no longer needed.
+
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all sidebar items
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to selected sidebar item
+            document.querySelector(`.sidebar-item[data-tab="${tabName}"]`).classList.add('active');
+
+            // Special handling for analytics tab to show placeholder if no chart
+            if (tabName === 'analytics') {
+                if (!dailyAnalyticsChart) { // Check if chart instance exists
+                    document.getElementById('analyticsPlaceholder').style.display = 'block';
+                } else {
+                    document.getElementById('analyticsPlaceholder').style.display = 'none';
+                }
+            } else {
+                document.getElementById('analyticsPlaceholder').style.display = 'none';
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for stored authentication
+            const stored = localStorage.getItem('pca_auth');
+            if (stored) {
+                const auth = JSON.parse(stored);
+                // Check if auth is less than 24 hours old
+                if (Date.now() - auth.timestamp < 24 * 60 * 60 * 1000) {
+                    currentUser = auth.username;
+                    document.getElementById('currentUser').textContent = auth.username;
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    loadInitialData();
+                } else {
+                    localStorage.removeItem('pca_auth');
+                }
+            }
+            
+            // Set default dates for all date inputs
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('joinDate').value = today;
+            document.getElementById('reportDate').value = today;
+            document.getElementById('countStartDate').value = today; /* Changed ID here */
+            document.getElementById('countEndDate').value = today; /* Changed ID here */
+            document.getElementById('analyticsStartDate').value = today;
+            document.getElementById('analyticsEndDate').value = today;
+            // Removed updateJoinYear() call here as the function is removed.
+
+            // Login form submission
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                login(username, password);
+            });
+            
+            // Student registration form submission
+            document.getElementById('studentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                registerStudent(formData);
+            });
+            
+            // Removed auto-update join year on date change event listener.
+            
+            // Sidebar tab switching
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    switchTab(tabName);
+                });
+            });
+            
+            // Enter key for search
+            document.getElementById('searchId').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchStudent();
+                }
+            });
+            
+            // Enter key for district
+            document.getElementById('newDistrict').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addDistrict();
+                }
+            });
+            
+            // Enter key for batch
+            document.getElementById('newBatch').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addBatch();
+                }
+            });
+        });
+
+        // Global functions for inline onclick handlers (needed for HTML attributes)
+        window.logout = logout;
+        window.addDistrict = addDistrict;
+        window.deleteDistrict = deleteDistrict;
+        window.addBatch = addBatch;
+        window.deleteBatch = deleteBatch;
+        window.searchStudent = searchStudent;
+        window.updateStudent = updateStudent; // Expose update function
+        window.deleteStudent = deleteStudent; // Expose delete function
+        window.generateDateReport = generateDateReport;
+        window.generateCountReport = generateCountReport;
+        window.generateDailyAnalytics = generateDailyAnalytics; // Expose analytics function
+    </script>
+</body>
+</html>
