@@ -3,7 +3,7 @@
 // ==============================
 
 const CONFIG = {
-  SPREADSHEET_ID: '1QjVx1DxNgimmYMm0CuQOmMrey21sa6v4_03pcVJJ7O8',
+  SPREADSHEET_ID: '',
   SHEETS: {
     STUDENTS: 'Students',
     DISTRICTS: 'Districts',
@@ -622,4 +622,5 @@ function testConnection() {
       message: 'Connection failed: ' + error.message
     };
   }
+
 }
